@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación de Aspiradora</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+        integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOM1Y9mhlpm1d/1TXe4q20nSRKVo2c9e1uGZT6D" crossorigin="anonymous">
+    <style>
+        body {
+            background: no-repeat #000;
+            background-size: cover;
+            position: relative;
+            overflow: hidden;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #particles-js {
+            position: absolute;
+            color: white;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        nav {
+            background-color: rgba(255, 255, 255, 0.1);
+            /* Fondo semi-transparente */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            /* Ajusta la altura */
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            /* Efecto de difuminado */
+        }
+
+        h1 {
+            color: white;
+            z-index: 3;
+            position: relative;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 36px;
+            /* Cambia el tamaño de la fuente si es necesario */
+        }
+
+        .timer,
+        .stats {
+            color: black;
+            background-color: white;
+            border: 2px solid white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            /* Añadido box-shadow */
+        }
+
+        .timer:hover,
+        .stats:hover,
+        button:hover {
+                    /* Cambia el fondo a negro */
+            background-color: black;
+                        /* Cambia el texto a blanco */
+            color: white;
+                        /* Cambia el borde a blanco */
+            border: 2px solid white;
+                        /* Sombra neón */
+            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8), 0 0 20px 5px rgba(255, 255, 255, 0.5);
+        }
+
+        table {
+            border-collapse: collapse;
+            margin: 20px auto;
+            position: relative;
+            z-index: 2;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            top: 15%;
+        }
+
+        td {
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid black;
+        }
+
+        .vacuum {
+            width: 30px;
+            height: 30px;
+        }
+
+        .trash {
+            width: 30px;
+            height: 30px;
+        }
+
+        .empty {
+            color: gray;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* Cambiado a 'center' para centrar horizontalmente */
+            position: absolute;
+            left: 20%;
+            top: 15%;
+            z-index: 2;
+        }
+
+        button {
+            margin: 10px 0;
+            padding: 10px 20px;
+            background-color: white;
+            border: 2px solid black;
+            border-radius: 5px;
+            cursor: pointer;
+            color: black;
+            /* Texto negro */
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            /* Añadido box-shadow */
+        }
+
+        #modeSelectContainer {
+    position: absolute;
+    top: 98%;
+    left: 11%; /* Ajusta según tu diseño */
+    z-index: 5; /* Para asegurarte de que se muestre sobre otros elementos */
+    background-color: white;
+    padding: 5px;
+    border: 1px solid black;
+    border-radius: 5px;
+}
+
+.hidden {
+    display: none;
+}
+
+#modeSelect {
+        background-color: white; /* Fondo blanco */
+        border: 2px solid black; /* Borde negro */
+        border-radius: 5px; /* Bordes redondeados */
+        padding: 5px; /* Espaciado interno */
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* Estilo para el hover del select */
+    #modeSelect:hover {
+        background-color: black; /* Fondo negro al pasar el cursor */
+        color: white; /* Texto blanco al pasar el cursor */
+        border: 2px solid white; /* Borde blanco al pasar el cursor */
+        box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8), 0 0 20px 5px rgba(255, 255, 255, 0.5); /* Sombra neón */
+    }
+
+    /* Estilo para las opciones (solo funciona en algunos navegadores) */
+    #modeSelect option {
+        background-color: white; /* Fondo blanco para opciones */
+        color: black; /* Texto negro para opciones */
+    }
+
+    /* Efecto hover en las opciones (no siempre funciona) */
+    #modeSelect option:hover {
+        background-color: black; /* Fondo negro al pasar el cursor */
+        color: white; /* Texto blanco al pasar el cursor */
+    }
+
+        @media (max-width: 1200px) {
+            .controls {
+                right: 20%;
+                top: 20%;
+            }
+
+            button,
+            .timer,
+            .stats {
+                font-size: 15px;
+                padding: 5px 10px;
+            }
+
+            td {
+                width: 30px;
+                height: 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <h1 id="title">Simulación de Aspiradora</h1>
+    </nav>
+    <div id="particles-js"></div>
+
+    <div class="controls">
+        <div class="timer" id="time">00:00</div>
+        <div class="stats">
+            <p>Basura recogida: <span id="trash-count">0</span></p>
+        </div>
+        <button class="button" onclick="resetMatrix()">Reiniciar Matriz</button>
+        <button class="button" onclick="resumeVacuum()">Mover Aspiradora</button>
+        <button class="button" onclick="stopVacuum()">Parar Aspiradora</button>
+        <button class="button" id="changeModeBtn" onclick="showModeSelect()">Cambiar Modo</button>
+    <!-- El contenedor para el select -->
+    <div id="modeSelectContainer" class="hidden">
+        <select id="modeSelect" onchange="changeMode()">
+            <option value="random">Random</option>
+            <option value="short route">Short Route</option>
+            <option value="snake">Snake</option>
+            <option value="spiral">Spiral</option>
+        </select>
+    </div>
+
+    </div>
+
+    <table id="matrix">
+        <!-- La matriz será generada aquí dinámicamente -->
+    </table>
+
+    <script src="http://falconmasters.com/demos/particulas/particles.min.js"></script>
+    <script src="http://falconmasters.com/demos/particulas/particulas.js"></script>
+    <script>
+
+let vacuumInterval;
+    let startTime;
+    let timerInterval;
+    const totalTrash = 10; // Total de basura que debe ser recogida
+
+    let colorScheme = false; 
+
+    // Función para actualizar la tabla
+    function updateMatrix(data) {
+        const matrixTable = document.getElementById('matrix');
+        const trashCount = document.getElementById('trash-count');
+        matrixTable.innerHTML = '';
+
+        for (let row_index = 0; row_index < data.matrix.length; row_index++) {
+            const row = document.createElement('tr');
+
+            for (let col_index = 0; col_index < data.matrix[row_index].length; col_index++) {
+                const cell = document.createElement('td');
+
+                if (row_index === data.vacuum_position[0] && col_index === data.vacuum_position[1]) {
+                    cell.innerHTML = '<img src="https://cdn-icons-png.flaticon.com/512/47/47708.png" class="vacuum" alt="Aspiradora">'; // Aspiradora
+                } else if (data.matrix[row_index][col_index] === 1) {
+                    cell.innerHTML = '<img src="   https://cdn-icons-png.flaticon.com/512/8027/8027717.png " class="trash" alt="Basura">'; // Basura
+                } else {
+                    cell.innerHTML = '<span class="empty"></span>'; // Celda vacía
+                }
+
+                row.appendChild(cell);
+            }
+
+            matrixTable.appendChild(row);
+        }
+
+        trashCount.textContent = data.trash_collected;
+
+        // Detener aspiradora y temporizador si toda la basura ha sido recogida
+        if (data.trash_collected >= totalTrash) {
+            stopVacuum();
+            alert('Toda la basura ha sido recogida');
+        }
+    }
+
+    function typingAndErasingEffect(element, text, typingDelay, erasingDelay) {
+            let index = 0;
+            let isErasing = false;
+
+            function updateText() {
+                if (isErasing) {
+                    element.textContent = text.substring(0, index);
+                    index--;
+
+                    if (index < 0) {
+                        isErasing = false; // Cambiar a escribir
+                        index = 0; // Reiniciar el índice para escribir de nuevo
+                        setTimeout(updateText, typingDelay); // Esperar antes de comenzar a escribir
+                    } else {
+                        setTimeout(updateText, erasingDelay); // Esperar antes de borrar la siguiente letra
+                    }
+                } else {
+                    element.textContent = text.substring(0, index);
+                    index++;
+
+                    if (index > text.length) {
+                        isErasing = true; // Cambiar a borrar
+                        index = text.length; // Ajustar índice al final del texto
+                        setTimeout(updateText, typingDelay); // Esperar antes de empezar a borrar
+                    } else {
+                        setTimeout(updateText, typingDelay); // Esperar antes de escribir la siguiente letra
+                    }
+                }
+            }
+
+            updateText(); // Iniciar el efecto
+        }
+
+    // Función para recargar la página
+    function resetMatrix() {
+    // Detener el temporizador
+    stopTimer();
+    startTime = null; // Reiniciar el tiempo a null o a 0
+    document.getElementById('time').textContent = '00:00'; // Reiniciar el temporizador a "00:00"
+
+    fetch('/reset_matrix')
+        .then(response => response.json())
+        .then(data => {
+            updateMatrix(data);  // Actualiza la matriz con los datos reiniciados
+        })
+        .catch(error => {
+            console.error('Error al reiniciar la matriz:', error);
+        });
+}
+
+// Reanuda la aspiradora sin reiniciar la matriz
+function resumeVacuum() {
+    if (!vacuumInterval) {
+        moveVacuum();
+        vacuumInterval = setInterval(moveVacuum, 500);
+        startTimer();  // Inicia el temporizador solo al mover la aspiradora
+    }
+}
+
+// Mueve la aspiradora
+function moveVacuum() {
+    fetch('/move')
+        .then(response => response.json())
+        .then(data => {
+            updateMatrix(data);
+        });
+}
+
+// Empieza la aspiradora y el temporizador
+function startVacuum() {
+    if (!vacuumInterval) {
+        moveVacuum();
+        vacuumInterval = setInterval(moveVacuum, 500);
+        startTimer();  // Inicia el temporizador
+    }
+}
+
+// Detiene la aspiradora y el temporizador
+function stopVacuum() {
+    clearInterval(vacuumInterval);
+    vacuumInterval = null;
+    stopTimer();  // Detiene el temporizador
+}
+
+function showModeSelect() {
+    const modeSelectContainer = document.getElementById('modeSelectContainer');
+    modeSelectContainer.classList.toggle('hidden'); // Mostrar/ocultar el select
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Mostrar/ocultar el select
+    function showModeSelect() {
+        const modeSelectContainer = document.getElementById('modeSelectContainer');
+        modeSelectContainer.classList.toggle('hidden'); // Mostrar/ocultar el select
+    }
+
+    // Asegúrate de que el elemento existe antes de añadir el listener
+    const modeSelect = document.getElementById('modeSelect');
+    if (modeSelect) {
+        modeSelect.addEventListener('change', function () {
+            const selectedMode = this.value; // Obtener el modo seleccionado
+            console.log(`Modo seleccionado ${selectedMode}`); // Log del modo seleccionado
+
+            // Realizar una solicitud al backend para cambiar el modo
+            fetch(`/set_mode?mode=${selectedMode}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la respuesta del servidor');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(`Modo cambiado a ${data.mode}`);
+                    alert(`Modo cambiado a ${data.mode}`);
+                })
+                .catch(error => {
+                    console.error('Error al cambiar el modo', error);
+                    alert(`Error: ${error.message}`);
+                });
+        });
+    } else {
+        console.error('No se encontró el elemento con ID modeSelect.');
+    }
+});
+
+
+// Actualiza el temporizador
+function updateTimer() {
+    const currentTime = Date.now();
+    const elapsedTime = currentTime - startTime;
+
+    const seconds = Math.floor((elapsedTime / 1000) % 60);
+    const minutes = Math.floor((elapsedTime / (1000 * 60)) % 60);
+
+    const formattedTime =
+        String(minutes).padStart(2, '0') + ':' +
+        String(seconds).padStart(2, '0');
+
+    document.getElementById('time').textContent = formattedTime;
+}
+
+// Inicia el temporizador
+function startTimer() {
+    startTime = Date.now();
+    timerInterval = setInterval(updateTimer, 1000);
+}
+
+// Detiene el temporizador
+function stopTimer() {
+    clearInterval(timerInterval);
+}
+    function updateTimer() {
+        const currentTime = Date.now();
+        const elapsedTime = currentTime - startTime;
+
+        const seconds = Math.floor((elapsedTime / 1000) % 60);
+        const minutes = Math.floor((elapsedTime / (1000 * 60)) % 60);
+
+        const formattedTime =
+            String(minutes).padStart(2, '0') + ':' +
+            String(seconds).padStart(2, '0');
+
+        document.getElementById('time').textContent = formattedTime;
+    }
+document.addEventListener('DOMContentLoaded', function () {
+    const titleElement = document.getElementById('title');
+    typingAndErasingEffect(titleElement, "Simulación de Aspiradora", 150, 100); // 150 ms para escribir y 100 ms para borrar
+    fetch('/move') // Obtiene los datos iniciales desde el backend
+        .then(response => response.json())
+        .then(data => {
+            updateMatrix(data);  // Actualiza la matriz
+            document.getElementById('trash-count').textContent = data.trash_collected;  // Reiniciar el contador a 0
+        });
+});
+    </script>
+</body>
+
+</html>
