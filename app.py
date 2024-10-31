@@ -67,37 +67,31 @@ def spiral_route(vacuum_position):
         spiral_route.steps = 0  # Pasos en la dirección actual
         spiral_route.change_direction_after = 1  # Pasos antes de cambiar de dirección
         spiral_route.layer = 0  # Capa actual (cerca del borde)
-    
+
+        # Marcar la posición inicial como visitada
+        spiral_route.visited.add(tuple(vacuum_position))
+
     row, col = vacuum_position
 
     # Intentar mover en la dirección actual
-    dr, dc = spiral_route.directions[spiral_route.current_direction]
-    new_row = row + dr
-    new_col = col + dc
-
-    # Comprobar si la nueva posición está dentro de los límites y no ha sido visitada
-    if 0 <= new_row < size_matrix and 0 <= new_col < size_matrix and (new_row, new_col) not in spiral_route.visited:
-        vacuum_position[0], vacuum_position[1] = new_row, new_col  # Mover a la nueva posición
-        spiral_route.visited.add((new_row, new_col))  # Marcar como visitada
-        spiral_route.steps += 1  # Contar el paso
-    else:
-        # Cambiar de dirección si estamos fuera de límites o la celda ya ha sido visitada
-        spiral_route.current_direction = (spiral_route.current_direction + 1) % 4
-        # Reiniciar pasos si hemos completado el número necesario
-        if spiral_route.steps >= spiral_route.change_direction_after:
-            spiral_route.steps = 0
-            spiral_route.layer += 1
-            spiral_route.change_direction_after += 2  # Aumentar el número de pasos a dar después de completar una vuelta
-        # Volver a calcular la dirección y la nueva posición
+    for _ in range(4):  # Intentar en las 4 direcciones
         dr, dc = spiral_route.directions[spiral_route.current_direction]
         new_row = row + dr
         new_col = col + dc
-        # Verificar nuevamente si podemos movernos
-        if 0 <= new_row < size_matrix and 0 <= new_col < size_matrix and (new_row, new_col) not in spiral_route.visited:
-            vacuum_position[0], vacuum_position[1] = new_row, new_col
-            spiral_route.visited.add((new_row, new_col))  # Marcar como visitada
 
-    return vacuum_position
+        # Comprobar si la nueva posición está dentro de los límites y no ha sido visitada
+        if 0 <= new_row < size_matrix and 0 <= new_col < size_matrix and (new_row, new_col) not in spiral_route.visited:
+            vacuum_position[0], vacuum_position[1] = new_row, new_col  # Mover a la nueva posición
+            spiral_route.visited.add((new_row, new_col))  # Marcar como visitada
+            spiral_route.steps += 1  # Contar el paso
+            return vacuum_position  # Salir una vez que se mueva exitosamente
+
+        # Cambiar de dirección si no se puede mover
+        spiral_route.current_direction = (spiral_route.current_direction + 1) % 4
+
+    return vacuum_position  # Devolver la posición actual si no se pudo mover
+
+
 
 
 
